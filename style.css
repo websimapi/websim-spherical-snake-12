@@ -1,0 +1,310 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: #000;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    touch-action: none; /* Prevent browser zooming/scrolling */
+    user-select: none;
+}
+
+#loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    z-index: 1000;
+    transition: opacity 0.5s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#loading-screen.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+#loader-canvas {
+    width: 100%;
+    height: 100%;
+}
+
+#game-container {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+}
+
+#ui-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none; /* Let touches pass through to 3D scene */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 20px;
+    box-sizing: border-box;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+}
+
+#player-card {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+}
+
+#player-card.visible {
+    opacity: 1;
+}
+
+#player-identity {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+#player-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: 3px solid white;
+    background-color: #333;
+    object-fit: cover;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+#player-name {
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+    background: rgba(0,0,0,0.5);
+    padding: 2px 6px;
+    border-radius: 4px;
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#player-score {
+    font-size: 48px;
+    color: white;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    align-self: flex-start;
+    margin-top: 10px;
+}
+
+#mute-toggle {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    z-index: 3;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    font-size: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+#mute-toggle:active {
+    transform: scale(0.95);
+}
+
+#start-message {
+    position: absolute;
+    bottom: 50px;
+    width: 100%;
+    text-align: center;
+    color: white;
+    font-size: 18px;
+    opacity: 0.8;
+    animation: pulse 2s infinite;
+}
+
+#game-over {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 50;
+    /* Fade-in Setup */
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 1.5s ease;
+}
+
+#game-over.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+#lobby-ui {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: white;
+    z-index: 40;
+    background: rgba(0,0,0,0.8);
+    padding: 20px 40px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#lobby-ui.hidden {
+    display: none;
+}
+
+#queue-status {
+    font-size: 24px;
+    font-weight: bold;
+    color: #ffd700;
+}
+
+#queue-position {
+    font-size: 16px;
+    color: #aaa;
+}
+
+#game-over h1 {
+    margin-top: 20vh;
+    font-size: 64px;
+    font-weight: 800;
+    color: #ff4444;
+    text-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    margin-bottom: 0;
+    animation: pulse 2s infinite;
+}
+
+#game-over-buttons {
+    margin-top: auto;
+    margin-bottom: 30px;
+    display: flex;
+    gap: 10px;
+    pointer-events: auto;
+}
+
+#game-over button {
+    padding: 10px 20px;
+    font-size: 18px;
+    background: #ff4444;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+#game-over button:active {
+    transform: scale(0.95);
+}
+
+#game-over button:disabled {
+    opacity: 1;
+    cursor: default;
+    transform: none;
+    filter: none;
+}
+
+#replay-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10; /* Above game and UI */
+    background: black;
+    display: flex;
+    flex-direction: column;
+}
+
+#replay-root {
+    flex: 1;
+    width: 100%;
+    height: 100%;
+}
+
+#close-replay {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 20;
+    padding: 10px 20px;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.hidden {
+    display: none !important;
+}
+
+body.ready #game-container,
+body.ready #ui-layer {
+    opacity: 1;
+}
+
+#black-fade {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 1100;
+    transition: opacity 0.5s ease;
+}
+
+#black-fade.visible {
+    opacity: 1;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.5; }
+    50% { opacity: 1; }
+    100% { opacity: 0.5; }
+}
