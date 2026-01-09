@@ -427,14 +427,20 @@ export class Game {
 
     updateNetworkState() {
         // Lobby Logic
-        const peers = Object.values(this.room.peers).sort((a, b) => {
-            const tA = (this.room.presence[a.id]?.joinedAt) || 0;
-            const tB = (this.room.presence[b.id]?.joinedAt) || 0;
-            return tA - tB; // Oldest first
-        });
-        
-        const playingPeers = peers.filter(p => this.room.presence[p.id]?.isPlaying);
-        const waitingPeers = peers.filter(p => !this.room.presence[p.id]?.isPlaying);
+        const allPeers = Object.values(this.room.peers);
+
+        // 1. Identify who is playing (Count everyone who claims to be playing)
+        const playingPeers = allPeers.filter(p => this.room.presence[p.id]?.isPlaying);
+
+        // 2. Identify who is validly waiting (Must have joinedAt to be in queue)
+        // This filters out peers who are initializing or have broken presence data
+        const waitingPeers = allPeers
+            .filter(p => !this.room.presence[p.id]?.isPlaying && this.room.presence[p.id]?.joinedAt)
+            .sort((a, b) => {
+                const tA = this.room.presence[a.id].joinedAt;
+                const tB = this.room.presence[b.id].joinedAt;
+                return tA - tB; // Oldest first
+            });
         
         if (this.isWaiting) {
             // Calculate my position in queue
@@ -444,11 +450,21 @@ export class Game {
             // UI Update
             const qStat = document.getElementById('queue-status');
             const qPos = document.getElementById('queue-position');
-            if (qStat) {
-                qStat.innerText = canJoin ? "Joining..." : "Waiting for slot...";
-                qStat.style.color = canJoin ? "#00ff00" : "#ffd700";
+            
+            if (myIndex === -1) {
+                // Presence hasn't propagated yet
+                if (qStat) {
+                    qStat.innerText = "Connecting...";
+                    qStat.style.color = "#ffd700";
+                }
+                if (qPos) qPos.innerText = `Syncing lobby state...`;
+            } else {
+                if (qStat) {
+                    qStat.innerText = canJoin ? "Joining..." : "Waiting for slot...";
+                    qStat.style.color = canJoin ? "#00ff00" : "#ffd700";
+                }
+                if (qPos) qPos.innerText = `Queue Position: ${myIndex + 1} / ${waitingPeers.length}\nActive Players: ${playingPeers.length}/${this.MAX_PLAYERS}`;
             }
-            if (qPos) qPos.innerText = `Queue Position: ${myIndex + 1} / ${waitingPeers.length}\nActive Players: ${playingPeers.length}/${this.MAX_PLAYERS}`;
 
             if (canJoin) {
                 // Safety delay to ensure state propagation
